@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function(){
     
 
+    let cc = '';
     const email = {
         email: '',
         asunto: '',
@@ -9,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
     // Seleccionar los elementos de la interfaz
     const inputEmail = document.querySelector('#email');
+    const inputCC = document.querySelector('#cc');
     const inputAsunto = document.querySelector('#asunto');
     const inputMensaje = document.querySelector('#mensaje');
     const formulario = document.querySelector('#formulario');
@@ -18,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
     // Asingar evnetos
     inputEmail.addEventListener('blur', validar);
+    inputCC.addEventListener('blur', validar);
     inputAsunto.addEventListener('blur', validar);
     inputMensaje.addEventListener('input', validar);
 
@@ -26,16 +29,8 @@ document.addEventListener('DOMContentLoaded', function(){
     btnReset.addEventListener('click', function(e) {
         e.preventDefault();
 
-        //reiniciar el objeto
-        email.email = '';
-        email.asunto = '';
-        email.mensaje = '';
-
         // Reiniciamos el formulario
-        formulario.reset();
-
-        // Actualizamos el arreglo email nuevmante con los campos vacios
-        comprobarEmail();
+        resetFormulario();
     })
 
     function enviarEmail(e) {
@@ -43,10 +38,30 @@ document.addEventListener('DOMContentLoaded', function(){
 
         spinner.classList.remove('hidden');
         spinner.classList.add('flex');
+
+        setTimeout(() => {
+            spinner.classList.add('hidden');
+            spinner.classList.remove('flex');
+
+            // Reiniciamos el formulario
+            resetFormulario();
+
+            // Crear alerta
+            const alertaExito = document.createElement('P');
+            alertaExito.classList.add('bg-green-500', 'text-white', 'p-2', 'text-center', 'rounded-lg', 'mt-10', 'font-bold', 'text-sm', 'uppercase');
+            alertaExito.textContent = 'Mensaje enviado correctamente';
+
+            // Agregamos la alerta al formulario
+            formulario.appendChild(alertaExito);
+
+            setTimeout(() => {
+                alertaExito.remove();
+            }, 3000);
+        }, 3000);
     }
 
     function validar(e) {
-        if(e.target.value.trim() === '') {
+        if(e.target.value.trim() === '' && !e.target.id === 'cc') {
             mostrarAlerta(`El Campo ${e.target.id} es obligatorio`, e.target.parentElement);
             email[e.target.name] = '';
             comprobarEmail();
@@ -59,9 +74,17 @@ document.addEventListener('DOMContentLoaded', function(){
             comprobarEmail();
             return;
         }
+
+        if(e.target.id === 'cc' && !validarEmail(e.target.value)) {
+            mostrarAlerta('El email extra no es valido', e.target.parentElement);
+            cc = '';
+            return;
+        }
+
         limpiarAlerta(e.target.parentElement);
 
         email[e.target.name] = e.target.value.trim().toLowerCase();
+        cc = e.target.value.trim().toLowerCase();
         
         comprobarEmail();
     };
@@ -103,4 +126,16 @@ document.addEventListener('DOMContentLoaded', function(){
         btnSubmit.disabled = false;
         
     }
+
+    function resetFormulario() {
+        //reiniciar el objeto
+        email.email = '';
+        email.asunto = '';
+        email.mensaje = '';
+        cc =  '';
+
+        // Reiniciamos el formulario
+        formulario.reset();
+        comprobarEmail();
+    };
 });
